@@ -59,6 +59,13 @@ public class OptWnd extends WindowX {
     public static final Text.Foundry LBL_FNT = new Text.Foundry(sans, 14);
     public Panel current;
     private WidgetList<KeyBinder.ShortcutWidget> shortcutList;
+    public static CheckBox disableValhallaFilterCheckBox;
+    public static CheckBox disableScreenShakingCheckBox;
+    public static CheckBox disableHempHighCheckBox;
+    public static CheckBox disableOpiumHighCheckBox;
+    public static CheckBox disableLibertyCapsHighCheckBox;
+    public static CheckBox disableDrunkennessDistortionCheckBox;
+    public static CheckBox autoPeaceAnimalsWhenCombatStartsCheckBox;
     
     public void chpanel(Panel p) {
 	if(current != null)
@@ -433,66 +440,214 @@ public class OptWnd extends WindowX {
 	    pack();
 	}
     }
-
+    public static HSlider instrumentsSoundVolumeSlider;
+    public static HSlider clapSoundVolumeSlider;
+    public static HSlider quernSoundVolumeSlider;
+    public static HSlider swooshSoundVolumeSlider;
+    public static HSlider cauldronSoundVolumeSlider;
+    public static HSlider squeakSoundVolumeSlider;
+    public static HSlider butcherSoundVolumeSlider;
+    public static HSlider whiteDuckCapSoundVolumeSlider;
+    public static HSlider chippingSoundVolumeSlider;
+    public static HSlider miningSoundVolumeSlider;
+    public static HSlider chestTinkVolumeSlider;
+    public static HSlider creakSoundVolumeSlider;
+    private final int audioSliderWidth = 220;
+    public static HSlider themeSongVolumeSlider;
     public class AudioPanel extends Panel {
 	public AudioPanel(Panel back) {
-	    prev = add(new Label("Master audio volume"), 0, 0);
-	    prev = add(new HSlider(UI.scale(200), 0, 1000, (int)(Audio.volume * 1000)) {
-		    public void changed() {
-			Audio.setvolume(val / 1000.0);
-		    }
-		}, prev.pos("bl").adds(0, 2));
-	    prev = add(new Label("Interface sound volume"), prev.pos("bl").adds(0, 15));
-	    prev = add(new HSlider(UI.scale(200), 0, 1000, 0) {
-		    protected void attach(UI ui) {
-			super.attach(ui);
-			val = (int)(ui.audio.aui.volume * 1000);
-		    }
-		    public void changed() {
-			ui.audio.aui.setvolume(val / 1000.0);
-		    }
-		}, prev.pos("bl").adds(0, 2));
-	    prev = add(new Label("In-game event volume"), prev.pos("bl").adds(0, 5));
-	    prev = add(new HSlider(UI.scale(200), 0, 1000, 0) {
-		    protected void attach(UI ui) {
-			super.attach(ui);
-			val = (int)(ui.audio.pos.volume * 1000);
-		    }
-		    public void changed() {
-			ui.audio.pos.setvolume(val / 1000.0);
-		    }
-		}, prev.pos("bl").adds(0, 2));
-	    prev = add(new Label("Ambient volume"), prev.pos("bl").adds(0, 5));
-	    prev = add(new HSlider(UI.scale(200), 0, 1000, 0) {
-		    protected void attach(UI ui) {
-			super.attach(ui);
-			val = (int)(ui.audio.amb.volume * 1000);
-		    }
-		    public void changed() {
-			ui.audio.amb.setvolume(val / 1000.0);
-		    }
-		}, prev.pos("bl").adds(0, 2));
-	    prev = add(new Label("Audio latency"), prev.pos("bl").adds(0, 15));
+	    Widget leftColumn, rightColumn;
+	    // Default audio volumes
+	    leftColumn = add(new Label("Master audio volume"));
+	    leftColumn = add(new HSlider(UI.scale(audioSliderWidth), 0, 1000, (int)(Audio.volume * 1000)) {
+		public void changed() {
+		    Audio.setvolume(val / 1000.0);
+		}
+	    }, leftColumn.pos("bl").adds(0, 2).x(0));
+	    
+	    leftColumn = add(new Label("Interface sound volume"), leftColumn.pos("bl").adds(0, 15));
+	    leftColumn = add(new HSlider(UI.scale(audioSliderWidth), 0, 1000, 0) {
+		protected void attach(UI ui) {
+		    super.attach(ui);
+		    val = (int)(ui.audio.aui.volume * 1000);
+		}
+		public void changed() {
+		    ui.audio.aui.setvolume(val / 1000.0);
+		}
+	    }, leftColumn.pos("bl").adds(0, 2));
+	    
+	    leftColumn = add(new Label("In-game event volume (Sound FX)"), leftColumn.pos("bl").adds(0, 5));
+	    leftColumn = add(new HSlider(UI.scale(audioSliderWidth), 0, 1000, 0) {
+		protected void attach(UI ui) {
+		    super.attach(ui);
+		    val = (int)(ui.audio.pos.volume * 1000);
+		}
+		public void changed() {
+		    ui.audio.pos.setvolume(val / 1000.0);
+		}
+	    }, leftColumn.pos("bl").adds(0, 2));
+	    
+	    leftColumn = add(new Label("Ambient volume"), leftColumn.pos("bl").adds(0, 5)/*UI.scale(240, 51)*/);
+	    leftColumn = add(new HSlider(UI.scale(audioSliderWidth), 0, 1000, 0) {
+		protected void attach(UI ui) {
+		    super.attach(ui);
+		    val = (int)(ui.audio.amb.volume * 1000);
+		}
+		public void changed() {
+		    ui.audio.amb.setvolume(val / 1000.0);
+		}
+	    }, leftColumn.pos("bl").adds(0, 2));
+	    
+	    
+	    
+	    
+	    leftColumn = add(new Label("Audio latency"), leftColumn.pos("bl").adds(0, 15));
+	    leftColumn.tooltip = audioLatencyTooltip;
 	    {
 		Label dpy = new Label("");
-		addhlp(prev.pos("bl").adds(0, 2), UI.scale(5),
-		       prev = new HSlider(UI.scale(160), 128, Math.round(Audio.fmt.getSampleRate() / 4), Audio.bufsize()) {
-			       protected void added() {
-				   dpy();
-			       }
-			       void dpy() {
-				   dpy.settext(Math.round((this.val * 1000) / Audio.fmt.getSampleRate()) + " ms");
-			       }
-			       public void changed() {
-				   Audio.bufsize(val, true);
-				   dpy();
-			       }
-			   }, dpy);
-		prev.settip("Sets the size of the audio buffer. Smaller sizes are better, " +
-			    "but larger sizes can fix issues with broken sound.", true);
+		addhlp(leftColumn.pos("bl").adds(0, 2).x(0), UI.scale(5),
+		    leftColumn = new HSlider(UI.scale(audioSliderWidth), Math.round(Audio.fmt.getSampleRate() * 0.05f), Math.round(Audio.fmt.getSampleRate() / 4), Audio.bufsize()) {
+			protected void added() {
+			    dpy();
+			}
+			void dpy() {
+			    dpy.settext(Math.round((this.val * 1000) / Audio.fmt.getSampleRate()) + " ms");
+			}
+			public void changed() {
+			    Audio.bufsize(val, true);
+			    dpy();
+			}
+		    }, dpy);
+		leftColumn.tooltip = audioLatencyTooltip;
 	    }
-	    add(new PButton(UI.scale(200), "Back", 27, back), prev.pos("bl").adds(0, 30));
+	    // SPECIFIC AUDIO VOLUMES
+	    
+	    rightColumn = add(new Label("Other Sound Settings"), UI.scale(300, 0));
+	    
+	    rightColumn = add(new Label("Boiling Cauldron Volume (Requires Reload)"), rightColumn.pos("bl").adds(0, 10).x(300));
+	    rightColumn = add(cauldronSoundVolumeSlider = new HSlider(UI.scale(audioSliderWidth), 0, 100, Utils.getprefi("cauldronSoundVolume", 25)) {
+		protected void attach(UI ui) {
+		    super.attach(ui);
+		}
+		public void changed() {
+		    Utils.setprefi("cauldronSoundVolume", val);
+		}
+	    }, rightColumn.pos("bl").adds(0, 2));
+	    
+	    rightColumn = add(new Label("Squeak Sound Volume (Roasting Spit, etc.)"), rightColumn.pos("bl").adds(0, 15));
+	    rightColumn = add(squeakSoundVolumeSlider = new HSlider(UI.scale(audioSliderWidth), 0, 100, Utils.getprefi("squeakSoundVolume", 25)) {
+		protected void attach(UI ui) {
+		    super.attach(ui);
+		}
+		public void changed() {
+		    Utils.setprefi("squeakSoundVolume", val);
+		}
+	    }, rightColumn.pos("bl").adds(0, 2));
+	    
+	    rightColumn = add(new Label("Butchering Sound Volume"), rightColumn.pos("bl").adds(0, 15));
+	    rightColumn = add(butcherSoundVolumeSlider = new HSlider(UI.scale(audioSliderWidth), 0, 100, Utils.getprefi("butcherSoundVolume", 75)) {
+		protected void attach(UI ui) {
+		    super.attach(ui);
+		}
+		public void changed() {
+		    Utils.setprefi("butcherSoundVolume", val);
+		}
+	    }, rightColumn.pos("bl").adds(0, 2));
+	    
+	    rightColumn = add(new Label("Quern Sound Effect Volume"), rightColumn.pos("bl").adds(0, 15));
+	    rightColumn = add(quernSoundVolumeSlider = new HSlider(UI.scale(audioSliderWidth), 0, 100, Utils.getprefi("quernSoundVolume", 10)) {
+		protected void attach(UI ui) {
+		    super.attach(ui);
+		}
+		public void changed() {
+		    Utils.setprefi("quernSoundVolume", val);
+		}
+	    }, rightColumn.pos("bl").adds(0, 2));
+	    
+	    rightColumn = add(new Label("Swoosh Sound Effect Volume"), rightColumn.pos("bl").adds(0, 15));
+	    rightColumn = add(swooshSoundVolumeSlider = new HSlider(UI.scale(audioSliderWidth), 0, 100, Utils.getprefi("swooshSoundVolume", 75)) {
+		protected void attach(UI ui) {
+		    super.attach(ui);
+		}
+		public void changed() {
+		    Utils.setprefi("quernSoundVolume", val);
+		}
+	    }, rightColumn.pos("bl").adds(0, 2));
+	    
+	    rightColumn = add(new Label("Music Instruments Volume"), rightColumn.pos("bl").adds(0, 15));
+	    rightColumn = add(instrumentsSoundVolumeSlider = new HSlider(UI.scale(audioSliderWidth), 0, 100, Utils.getprefi("instrumentsSoundVolume", 70)) {
+		protected void attach(UI ui) {
+		    super.attach(ui);
+		}
+		public void changed() {
+		    Utils.setprefi("instrumentsSoundVolume", val);
+		}
+	    }, rightColumn.pos("bl").adds(0, 2));
+	    
+	    rightColumn = add(new Label("Clap Sound Effect Volume"), rightColumn.pos("bl").adds(0, 15));
+	    rightColumn = add(clapSoundVolumeSlider = new HSlider(UI.scale(audioSliderWidth), 0, 100, Utils.getprefi("clapSoundVolume", 10)) {
+		protected void attach(UI ui) {
+		    super.attach(ui);
+		}
+		public void changed() {
+		    Utils.setprefi("clapSoundVolume", val);
+		}
+	    }, rightColumn.pos("bl").adds(0, 2));
+	    
+	    rightColumn = add(new Label("White Duck Cap Sound Volume"), rightColumn.pos("bl").adds(0, 15));
+	    rightColumn = add(whiteDuckCapSoundVolumeSlider = new HSlider(UI.scale(audioSliderWidth), 0, 100, Utils.getprefi("whiteDuckCapSoundVolume", 75)) {
+		protected void attach(UI ui) {
+		    super.attach(ui);
+		}
+		public void changed() {
+		    Utils.setprefi("whiteDuckCapSoundVolume", val);
+		}
+	    }, rightColumn.pos("bl").adds(0, 2));
+	    
+	    rightColumn = add(new Label("Chipping Sound Effect Volume"), rightColumn.pos("bl").adds(0, 15));
+	    rightColumn = add(chippingSoundVolumeSlider = new HSlider(UI.scale(audioSliderWidth), 0, 100, Utils.getprefi("chippingSoundVolume", 75)) {
+		protected void attach(UI ui) {
+		    super.attach(ui);
+		}
+		public void changed() {
+		    Utils.setprefi("chippingSoundVolume", val);
+		}
+	    }, rightColumn.pos("bl").adds(0, 2));
+	    
+	    rightColumn = add(new Label("Mining Sound Volume"), rightColumn.pos("bl").adds(0, 15));
+	    rightColumn = add(miningSoundVolumeSlider = new HSlider(UI.scale(audioSliderWidth), 0, 100, Utils.getprefi("miningSoundVolume", 75)) {
+		protected void attach(UI ui) {
+		    super.attach(ui);
+		}
+		public void changed() {
+		    Utils.setprefi("miningSoundVolume", val);
+		}
+	    }, rightColumn.pos("bl").adds(0, 2));
+	    
+	    rightColumn = add(new Label("Chest tink sound"), rightColumn.pos("bl").adds(0, 15));
+	    rightColumn = add(chestTinkVolumeSlider = new HSlider(UI.scale(audioSliderWidth), 0, 100, Utils.getprefi("chestTinkVolume", 75)) {
+		protected void attach(UI ui) {
+		    super.attach(ui);
+		}
+		public void changed() {
+		    Utils.setprefi("chestTinkVolume", val);
+		}
+	    }, rightColumn.pos("bl").adds(0, 2));
+	    
+	    rightColumn = add(new Label("Cupboard/chest creak sound"), rightColumn.pos("bl").adds(0, 15));
+	    rightColumn = add(creakSoundVolumeSlider = new HSlider(UI.scale(audioSliderWidth), 0, 100, Utils.getprefi("creakSoundVolume", 75)) {
+		protected void attach(UI ui) {
+		    super.attach(ui);
+		}
+		public void changed() {
+		    Utils.setprefi("creakSoundVolume", val);
+		}
+	    }, rightColumn.pos("bl").adds(0, 2));
+	    
+	    Widget backButton;
+	    add(backButton = new PButton(UI.scale(200), "Back", 27, back), rightColumn.pos("bl").adds(0, 30).x(0));
 	    pack();
+	    centerBackButton(backButton, this);
 	}
     }
 
@@ -585,6 +740,7 @@ public class OptWnd extends WindowX {
 			      new Label(nm), new SetButton(UI.scale(175), cmd))
 		   + UI.scale(2));
 	}
+	
 
 	public BindingPanel(Panel back) {
 	    super();
@@ -640,30 +796,31 @@ public class OptWnd extends WindowX {
 	    prev = adda(new PButton(UI.scale(200), "Back", 27, back), prev.pos("bl").adds(0, 10).x(scroll.sz.x / 2), 0.5, 0.0);
 	    pack();
 	}
-
+	
 	public class SetButton extends KeyMatch.Capture {
 	    public final KeyBinding cmd;
-
+	    
 	    public SetButton(int w, KeyBinding cmd) {
 		super(w, cmd.key());
 		this.cmd = cmd;
 	    }
-
+	    
 	    public void set(KeyMatch key) {
 		super.set(key);
 		cmd.set(key);
 	    }
-
+	    
 	    public void draw(GOut g) {
 		if(cmd.key() != key)
 		    super.set(cmd.key());
 		super.draw(g);
 	    }
-
+	    
 	    protected KeyMatch mkmatch(KeyEvent ev) {
+		
 		return(KeyMatch.forevent(ev, ~cmd.modign));
 	    }
-
+	    
 	    protected boolean handle(KeyEvent ev) {
 		if(ev.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
 		    cmd.set(null);
@@ -673,10 +830,8 @@ public class OptWnd extends WindowX {
 		return(super.handle(ev));
 	    }
 	    
-	    @Override
-	    protected boolean i10n() { return false; }
-	    
 	    public Object tooltip(Coord c, Widget prev) {
+		
 		return(kbtt.tex());
 	    }
 	}
@@ -794,6 +949,8 @@ public class OptWnd extends WindowX {
 	Panel audio = add(new AudioPanel(main));
 	Panel iface = add(new InterfacePanel(main));
 	Panel keybind = add(new BindingPanel(main));
+	Panel yoink = add(new YoinkPanel(main));
+	//Panel alarmsettings = add(new AlarmsAndSoundsSettingsPanel(main));
 	display = add(new Panel());
 	uipanel = add(new Panel());
 	combat = add(new Panel());
@@ -807,7 +964,7 @@ public class OptWnd extends WindowX {
 	experimental = add(new Panel());
 
 	int row = 0, colum = 0, mrow = 1;
-    
+ 
 	addPanelButton("Interface settings", 'i', iface, colum, row++);
 	addPanelButton("Video settings", 'v', video, colum, row++);
 	addPanelButton("Audio settings", 'a', audio, colum, row++);
@@ -815,7 +972,7 @@ public class OptWnd extends WindowX {
 	addPanelButton("Widget shortcuts", 'k', keybind, colum, row++);
 	addPanelButton("Global shortcuts", 's', shortcuts, colum, row++);
 	//addPanelButton("",'l', Action.);
-    
+ 
 	colum++;
 	mrow = Math.max(mrow, row);
 	row = 0;
@@ -834,6 +991,8 @@ public class OptWnd extends WindowX {
 	addPanelButton("Map upload", 'm', mapping, colum, row++);
 	addPanelButton("Automation settings", 't', automation, colum, row++);
 	addPanelButton("Experimental", 'x', experimental, colum, row++);
+	addPanelButton("Yoink!", 'y', yoink, colum, row++);
+	//addPanelButton("Alarms", 'a', alarmsettings, colum, row++);
 
 	int y = 0;
 	mrow = Math.max(mrow, row);
@@ -929,7 +1088,7 @@ public class OptWnd extends WindowX {
 		}
 	    }
 	}, tx, y).sel = MapView.defcam();
-    
+ 
 	y += BIG_STEP;
 	camera.add(new Label("Brighten view"), x, y);
 	y += UI.scale(15);
@@ -941,16 +1100,16 @@ public class OptWnd extends WindowX {
 		}
 	    }
 	}, x, y).val = (int) (1000 * CFG.CAMERA_BRIGHT.get());
-    
+ 
 	y += BIG_STEP;
 	camera.add(new CFGBox("Invert horizontal camera rotation", CFG.CAMERA_INVERT_X), x, y);
-    
+ 
 	y += STEP;
 	camera.add(new CFGBox("Invert vertical camera rotation", CFG.CAMERA_INVERT_Y), x, y);
 	
 	y += STEP;
 	camera.add(new CFGBox("Extend zoom for ortho", CFG.EXTEND_ZOOM_ON_ORTHO), x, y);
-    
+ 
 	y += BIG_STEP;
 	my = Math.max(my, y);
 
@@ -964,13 +1123,13 @@ public class OptWnd extends WindowX {
 	int START;
 	int x, y;
 	int my = 0, tx;
-    
+ 
 	Widget title = panel.add(new Label("General settings", LBL_FNT), 0, 0);
 	START = title.sz.y + UI.scale(10);
-    
+ 
 	x = 0;
 	y = START;
-    
+ 
 	tx = x + panel.add(new Label("Language (requires restart):"), x, y).sz.x + UI.scale(5);
 	panel.add(new Dropbox<String>(UI.scale(80), 5, UI.scale(16)) {
 	    @Override
@@ -994,28 +1153,28 @@ public class OptWnd extends WindowX {
 		if(!item.equals(L10N.LANGUAGE.get())) L10N.LANGUAGE.set(item);
 	    }
 	}, tx, y).change(L10N.LANGUAGE.get());
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Output missing translation lines", L10N.DBG), x, y);
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Force hardware cursor", CFG.FORCE_HW_CURSOR, null, true), x, y);
 	
 	y += STEP;
 	panel.add(new CFGBox("Store minimap tiles", CFG.STORE_MAP), x, y);
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Store chat logs", CFG.STORE_CHAT_LOGS, "Logs are stored in 'chats' folder"), new Coord(x, y));
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Item drop protection", CFG.ITEM_DROP_PROTECTION, "Drop items on cursor only when CTRL is pressed"), new Coord(x, y));
 	
 	y += STEP;
 	panel.add(new CFGBox("Container decal pickup protection", CFG.DECAL_SHIFT_PICKUP, "Require holding CTRL or SHIFT to pickup decals placed on containers."), new Coord(x, y));
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Enable path queueing", CFG.QUEUE_PATHS, "ALT+LClick in world or on minimap will queue movement"), x, y);
-    
+ 
 	y += STEP;
 	Coord tsz = panel.add(new Label("Default speed:"), x, y).sz;
 	panel.adda(new Speedget.SpeedSelector(UI.scale(100)), new Coord(x + tsz.x + UI.scale(5), y + tsz.y / 2), 0, 0.5);
@@ -1027,10 +1186,10 @@ public class OptWnd extends WindowX {
 	    @Override
 	    protected void updateLabel() {this.label.settext(String.format(format, val / 11.0));}
 	}, x, y);
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Auto pickup only visible", CFG.AUTO_PICK_ONLY_RADAR, "If on will pickup only objects with enabled minimap icons"), x, y);
-    
+ 
 	y += 2 * STEP;
 	panel.add(new Button(UI.scale(150), "Warning settings", false) {
 	    @Override
@@ -1054,15 +1213,15 @@ public class OptWnd extends WindowX {
 		}
 	    }
 	}, x, y);
-    
+ 
 	my = Math.max(my, y);
 	x += UI.scale(250);
 	y = START;
-    
+ 
 	panel.add(new Label("Choose menu items to select automatically:"), x, y);
 	y += UI.scale(15);
 	final FlowerList list = panel.add(new FlowerList(), x, y);
-    
+ 
 	y += list.sz.y + UI.scale(5);
 	final TextEntry value = panel.add(new TextEntry(UI.scale(160), "") {
 	    @Override
@@ -1071,7 +1230,7 @@ public class OptWnd extends WindowX {
 		settext("");
 	    }
 	}, x, y);
-    
+ 
 	panel.add(new Button(UI.scale(85), "Add") {
 	    @Override
 	    public void click() {
@@ -1079,7 +1238,7 @@ public class OptWnd extends WindowX {
 		value.settext("");
 	    }
 	}, x + UI.scale(165), y - UI.scale(2));
-    
+ 
 	y += STEP;
 	tx = x + panel.add(new Label("Hold to ignore auto choose:"), x, y).sz.x + UI.scale(5);
 	panel.add(new Dropbox<UI.KeyMod>(UI.scale(100), 5, UI.scale(16)) {
@@ -1104,15 +1263,15 @@ public class OptWnd extends WindowX {
 		if(!item.equals(CFG.MENU_SKIP_AUTO_CHOOSE.get())) CFG.MENU_SKIP_AUTO_CHOOSE.set(item, true);
 	    }
 	}, tx, y).change(CFG.MENU_SKIP_AUTO_CHOOSE.get());
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Single item CTRL choose", CFG.MENU_SINGLE_CTRL_CLICK, "If checked, will automatically select single item menus if CTRL is pressed when menu is opened."), x, y);
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Add \"Pick All\" option", CFG.MENU_ADD_PICK_ALL, "If checked, will add new option that will allow to pick all same objects."), x, y);
-    
+ 
 	my = Math.max(my, y);
-    
+ 
 	panel.add(new PButton(UI.scale(200), "Back", 27, main), 0, my + UI.scale(35));
 	panel.pack();
 	title.c.x = (panel.sz.x - title.sz.x) / 2;
@@ -1124,10 +1283,10 @@ public class OptWnd extends WindowX {
 	int START;
 	int x, y;
 	int my = 0, tx;
-    
+ 
 	Widget title = panel.add(new Label("Display settings", LBL_FNT), 0, 0);
 	START = title.sz.y + UI.scale(10);
-    
+ 
 	x = 0;
 	y = START;
 	panel.add(new CFGBox("Show flavor objects", CFG.DISPLAY_FLAVOR, "Requires restart"), x, y);
@@ -1143,7 +1302,7 @@ public class OptWnd extends WindowX {
 	
 	y += STEP;
 	panel.add(new CFGBox("Enable terrain blending", CFG.ENABLE_TERRAIN_BLEND), x, y);
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Make terrain flat", CFG.FLAT_TERRAIN, null, true), x, y);
 	
@@ -1158,7 +1317,7 @@ public class OptWnd extends WindowX {
 	
 	y += STEP;
 	panel.add(new CFGBox("Play sound when kin changes status", CFG.DISPLAY_KINSFX), x, y);
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Show task status messages", CFG.SHOW_BOT_MESSAGES, "Will log task (like auto-pickup or auto-drink) status to system log"), x, y);
 
@@ -1175,7 +1334,7 @@ public class OptWnd extends WindowX {
 	    }
 	    
 	}, x + tx + UI.scale(10), y + UI.scale(1)).settip("Configure types of info that is shown");
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Display container fullness", CFG.SHOW_CONTAINER_FULLNESS, "Makes containers tint different colors when they are empty or full", true), x, y);
 	
@@ -1257,7 +1416,7 @@ public class OptWnd extends WindowX {
 	y += STEP;
 	tx = panel.add(new CFGColorBtn(CFG.COLOR_GOB_CRITTERS, true), x + H_STEP, y).sz.x + H_STEP;
 	panel.add(new CFGBox("Critters", CFG.DISPLAY_AURA_CRITTERS), x + tx + H_STEP, y);
-    
+ 
 	my = Math.max(my, y);
 	
 	panel.add(new PButton(UI.scale(200), "Back", 27, main), new Coord(0, my + UI.scale(35)));
@@ -1270,9 +1429,9 @@ public class OptWnd extends WindowX {
 	int START;
 	int x, y;
 	int my = 0, tx;
-    
+ 
 	Widget title = panel.add(new Label("UI settings", LBL_FNT), 0, 0);
-	START = title.sz.y + UI.scale(10); 
+	START = title.sz.y + UI.scale(10);
 	
 	x = 0;
     	y = START;
@@ -1300,7 +1459,7 @@ public class OptWnd extends WindowX {
 		if(!item.equals(CFG.THEME.get())) CFG.THEME.set(item, true);
 	    }
 	}, tx, y).change(CFG.THEME.get());
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Always show UI on start", CFG.DISABLE_UI_HIDING), x, y);
 
@@ -1315,7 +1474,7 @@ public class OptWnd extends WindowX {
 
 	y += STEP;
 	panel.add(new CFGBox("Show F-key tool bar", CFG.SHOW_TOOLBELT_0), x, y);
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Show extra tool bar", CFG.SHOW_TOOLBELT_1), x, y);
 	
@@ -1327,7 +1486,7 @@ public class OptWnd extends WindowX {
 		if(a) {FEPMeter.add(ui);} else {FEPMeter.rem(ui);}
 	    }
 	}, x, y);
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Show hunger meter", CFG.HUNGER_METER) {
 	    @Override
@@ -1354,10 +1513,10 @@ public class OptWnd extends WindowX {
 
 	y += STEP;
 	panel.add(new CFGBox("Show food categories", CFG.DISPLAY_FOOD_CATEGORIES, "Shows list of food categories in the tooltip", true), x, y);
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Show biomes on minimap", CFG.MMAP_SHOW_BIOMES), x, y);
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Show queued path on minimap", CFG.MMAP_SHOW_PATH), x, y);
 	
@@ -1366,7 +1525,7 @@ public class OptWnd extends WindowX {
 	
 	y += STEP;
 	panel.add(new CFGBox("Always show Minimap at start", CFG.SHOW_MINIMAP_ON_START), new Coord(x, y));
-    
+ 
 	y += 2*STEP;
 	panel.add(new CFGBox("Require SHIFT to show stack inventory", CFG.UI_STACK_SUB_INV_ON_SHIFT, "Show stack hover-inventories only if SHIFT is pressed"), x, y);
 	
@@ -1377,43 +1536,43 @@ public class OptWnd extends WindowX {
 	
 	y += STEP;
 	panel.add(new CFGBox("Unpack stacks in list inventory", CFG.UI_STACK_EXT_INV_UNPACK, "Show stacked items 'unpacked' in extra inventory's list"), x, y);
-    
+ 
 	//second row
 	my = Math.max(my, y);
 	x += UI.scale(265);
 	y = START;
 	panel.add(new CFGBox("Real time curios", CFG.REAL_TIME_CURIO, "Show curiosity study time in real life hours, instead of server hours"), new Coord(x, y));
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Display curio remaining time in tooltip", CFG.SHOW_CURIO_REMAINING_TT), new Coord(x, y));
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Display curio remaining time instead of progress", CFG.SHOW_CURIO_REMAINING_METER), new Coord(x, y));
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Show LP/H for curios", CFG.SHOW_CURIO_LPH, "Show how much learning point curio gives per hour"), new Coord(x, y));
-    
+ 
 	y += 2*STEP;
 	panel.add(new CFGBox("Show item quality", CFG.Q_SHOW_SINGLE), x, y);
 	
 	y += STEP;
 	panel.add(new CFGBox("Show fep numbers on food.", CFG.SHOW_FEP_NUMBERS_ON_FOOD), x, y);
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Swap item quality and number", CFG.SWAP_NUM_AND_Q), x, y);
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Show item progress as number", CFG.PROGRESS_NUMBER), x, y);
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Show item durability", CFG.SHOW_ITEM_DURABILITY), new Coord(x, y));
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Show item wear bar", CFG.SHOW_ITEM_WEAR_BAR), new Coord(x, y));
 	
 	y += STEP;
 	panel.add(new CFGBox("Highlight broken items", CFG.HIGHLIGHT_BROKEN_ITEMS, "Broken items will have red border"), new Coord(x, y));
-    
+ 
 	y += STEP;
 	panel.add(new CFGBox("Show item armor", CFG.SHOW_ITEM_ARMOR), new Coord(x, y));
 	
@@ -1448,7 +1607,7 @@ public class OptWnd extends WindowX {
 	panel.add(new CFGBox("Enable purge button for kin list. (restart required)", CFG.ENABLE_PURGE_BUTTON_IN_KIN_LIST), x, y);
 	
 	my = Math.max(my, y);
-    
+ 
 	panel.add(new PButton(UI.scale(200), "Back", 27, main), new Coord(0, my + UI.scale(35)));
 	panel.pack();
 	title.c.x = (panel.sz.x - title.sz.x) / 2;
@@ -1638,4 +1797,208 @@ public class OptWnd extends WindowX {
 	chpanel(main);
 	super.show();
     }
+    public class SetButton extends KeyMatch.Capture {
+	public final KeyBinding cmd;
+	
+	public SetButton(int w, KeyBinding cmd) {
+	    super(w, cmd.key());
+	    this.cmd = cmd;
+	}
+	
+	public void set(KeyMatch key) {
+	    super.set(key);
+	    cmd.set(key);
+	}
+	
+	public void draw(GOut g) {
+	    if(cmd.key() != key)
+		super.set(cmd.key());
+	    super.draw(g);
+	}
+	
+	protected KeyMatch mkmatch(KeyEvent ev) {
+	    
+	    return(KeyMatch.forevent(ev, ~cmd.modign));
+	}
+	
+	protected boolean handle(KeyEvent ev) {
+	    if(ev.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+		cmd.set(null);
+		super.set(cmd.key());
+		return(true);
+	    }
+	    return(super.handle(ev));
+	}
+	
+	public Object tooltip(Coord c, Widget prev) {
+	    
+	    return(kbtt.tex());
+	}
+    }
+    private int addbtn(Widget cont, String nm, KeyBinding cmd, int y) {
+	return(cont.addhl(new Coord(0, y), cont.sz.x,
+	    new Label(nm), new SetButton(UI.scale(140), cmd))
+	    + UI.scale(2));
+    }
+    private int addbtnImproved(Widget cont, String nm, String tooltip, Color color, KeyBinding cmd, int y) {
+	Label theLabel = new Label(nm);
+	if (tooltip != null && !tooltip.equals(""))
+	    theLabel.tooltip = RichText.render(tooltip, UI.scale(300));
+	theLabel.setcolor(color);
+	return (cont.addhl(new Coord(0, y), cont.sz.x,
+	    theLabel, new SetButton(UI.scale(140), cmd))
+	    + UI.scale(2));
+    }
+    public class YoinkPanel extends Panel {
+	private int addbtn(Widget cont, String nm, KeyBinding cmd, int y) {
+	    return (cont.addhl(new Coord(0, y), cont.sz.x,
+		new Label(nm), new SetButton(UI.scale(140), cmd))
+		+ UI.scale(2));
+	}
+	
+	public YoinkPanel(Panel back) {
+	    super();
+	    int STEP = UI.scale(25);
+	    int START;
+	    int my = 0, tx;
+	    int y = 5;
+	    
+	    Label topNote = new Label("Don't use the same keys on multiple Keybinds!");
+	    topNote.setcolor(Color.RED);
+	    y = adda(topNote, UI.scale(155), y, 0.5, 0.0).pos("bl").adds(0, 5).y;
+	    y = adda(new Label("If you do that, only one of them will work. God knows which."), 310 / 2, y, 0.5, 0.0).pos("bl").adds(0, 5).y;
+	    Scrollport scroll = add(new Scrollport(UI.scale(new Coord(310, 360))), 0, 60);
+	    Widget cont = scroll.cont;
+	    Widget prev;
+	    y = 0;
+	    y += UI.scale(15);
+	    y = addbtnImproved(cont, "Click Nearest Object (Cursor)", "When this button is pressed, you will instantly click the nearest object to your cursor, selected from below. For non-combat only, doesn't work during combat." +
+		"\n$col[218,163,0]{Range:} $col[185,185,185]{12 tiles (approximately)}", new Color(255, 191, 0, 255), GameUI.kb_clickNearestCursorObject, y);
+	    y = addbtnImproved(cont, "Click Nearest Object (Cursor)(C)", "When this button is pressed, you will instantly click the nearest object to your cursor, selected from below. Works during combat, blocks other input." +
+		"\n$col[218,163,0]{Range:} $col[185,185,185]{12 tiles (approximately)}", new Color(255, 191, 0, 255), GameUI.kb_clickNearestCursorObjectCombat, y);
+	    y = addbtnImproved(cont, "Click Nearest Object (You)", "When this button is pressed, you will instantly click the nearest object to you, selected from below." +
+		"\n$col[218,163,0]{Range:} $col[185,185,185]{12 tiles (approximately)}", new Color(255, 191, 0, 255), GameUI.kb_clickNearestObject, y);
+	    Widget objectsLeft, objectsRight;
+	    y = cont.adda(objectsLeft = new Label("Objects to Click:"), UI.scale(20), y + UI.scale(2), 0, 0.0).pos("bl").adds(0, 5).y;
+	    objectsLeft = cont.add(new CheckBox("Forageables") {
+		{a = Utils.getprefb("clickNearestObject_Forageables", true);}
+		
+		public void changed(boolean val) {Utils.setprefb("clickNearestObject_Forageables", val);}
+	    }, objectsLeft.pos("ur").adds(4, 0)).settip("Pick the nearest Forageable.");
+	    objectsRight = cont.add(new CheckBox("Critters") {
+		{a = Utils.getprefb("clickNearestObject_Critters", true);}
+		
+		public void changed(boolean val) {Utils.setprefb("clickNearestObject_Critters", val);}
+	    }, objectsLeft.pos("ur").adds(50, 0)).settip("Chase the nearest Critter.");
+	    objectsLeft = cont.add(new CheckBox("Non-Visitor Gates") {
+		{a = Utils.getprefb("clickNearestObject_NonVisitorGates", true);}
+		
+		public void changed(boolean val) {Utils.setprefb("clickNearestObject_NonVisitorGates", val);}
+	    }, objectsLeft.pos("bl").adds(0, 4)).settip("Open/Close the nearest Non-Visitor Gate.");
+	    objectsRight = cont.add(new CheckBox("Caves") {
+		{a = Utils.getprefb("clickNearestObject_Caves", false);}
+		
+		public void changed(boolean val) {Utils.setprefb("clickNearestObject_Caves", val);}
+	    }, objectsRight.pos("bl").adds(0, 4)).settip("Go through the nearest Cave Entrance/Exit.");
+	    objectsLeft = cont.add(new CheckBox("Mineholes & Ladders") {
+		{a = Utils.getprefb("clickNearestObject_MineholesAndLadders", false);}
+		
+		public void changed(boolean val) {Utils.setprefb("clickNearestObject_MineholesAndLadders", val);}
+	    }, objectsLeft.pos("bl").adds(0, 4)).settip("Hop down the nearest Minehole, or Climb up the nearest Ladder.");
+	    objectsRight = cont.add(new CheckBox("Doors") {
+		{a = Utils.getprefb("clickNearestObject_Doors", false);}
+		
+		public void changed(boolean val) {Utils.setprefb("clickNearestObject_Doors", val);}
+	    }, objectsRight.pos("bl").adds(0, 4)).settip("Go through the nearest Door.");
+	    y += UI.scale(60);
+	    /* = addbtnImproved(cont, "Hop on Nearest Vehicle", "When this button is pressed, your character will run towards the nearest mountable Vehicle/Animal, and try to mount it." +
+		"\n\n$col[185,185,185]{If the closest vehicle to you is full, or unmountable (like a rowboat on land), it will keep looking for the next closest mountable vehicle.}" +
+		"\n\n$col[218,163,0]{Works with:} Knarr, Snekkja, Rowboat, Dugout, Kicksled, Coracle, Wagon, Wilderness Skis, Tamed Horse" +
+		"\n\n$col[218,163,0]{Range:} $col[185,185,185]{36 tiles (approximately)}", new Color(255, 191, 0, 255), GameUI.kb_enterNearestVehicle, y);
+	    y += UI.scale(20);
+	    
+	    y = addbtnImproved(cont, "Lift Nearest into Wagon/Cart", "When pressed the nearest supported liftable object will be stored in the nearest Wagon/Cart" +
+		"\n\n$col[185,185,185]{If you are riding a Wagon it will try to exit the wagon, store the object and enter the wagon again.}", new Color(255, 191, 0, 255), GameUI.kb_wagonNearestLiftable, y);
+	    Widget objectsLiftActionLeft, objectsLiftActionRight;
+	    y = cont.adda(objectsLiftActionLeft = new Label("Objects to Lift:"), UI.scale(20), y + UI.scale(2), 0, 0.0).pos("bl").adds(0, 5).y;
+	    objectsLiftActionLeft = cont.add(new CheckBox("Dead Animals") {
+		{a = Utils.getprefb("wagonNearestLiftable_animalcarcass", true);}
+		
+		public void changed(boolean val) {Utils.setprefb("wagonNearestLiftable_animalcarcass", val);}
+	    }, objectsLiftActionLeft.pos("ur").adds(39, 0)).settip("Lift the nearest animal carcass into Wagon/Cart.");
+	    objectsLiftActionRight = cont.add(new CheckBox("Containers") {
+		{a = Utils.getprefb("wagonNearestLiftable_container", true);}
+		
+		public void changed(boolean val) {Utils.setprefb("wagonNearestLiftable_container", val);}
+	    }, objectsLiftActionLeft.pos("ur").adds(4, 0)).settip("Lift the nearest storage container into Wagon/Cart.");
+	    objectsLiftActionLeft = cont.add(new CheckBox("Tree Logs") {
+		{a = Utils.getprefb("wagonNearestLiftable_log", true);}
+		
+		public void changed(boolean val) {Utils.setprefb("wagonNearestLiftable_log", val);}
+	    }, objectsLiftActionLeft.pos("bl").adds(0, 4)).settip("Lift nearest log into Wagon/Cart.");*/
+	    
+	    y += UI.scale(40);
+	    y = addbtnImproved(cont, "Combat Cheese Auto-Distance", "", new Color(0, 255, 34, 255), GameUI.kb_autoCombatDistance, y);
+	    y = addbtnImproved(cont, "Toggle Auto-Reaggro Target", "Use this to cheese animals and instantly re-aggro them when they flee.", new Color(0, 255, 34, 255), GameUI.kb_autoReaggroTarget, y);
+	    y+=UI.scale(20);
+	    y = addbtn(cont, "Instant Log Out", GameUI.kb_instantLogout, y);
+	    
+	    prev = add(new Label("Screen Effects:"), UI.scale(400, 0));
+	    prev = add(disableScreenShakingCheckBox = new CheckBox("Disable Screen Shaking"){
+		{a = (Utils.getprefb("disableScreenShaking", true));}
+		public void changed(boolean val) {
+		    Utils.setprefb("disableScreenShaking", val);
+		}
+	    }, prev.pos("bl").adds(0, 10));
+	    disableScreenShakingCheckBox.tooltip = disableScreenShakingTooltip;
+	    
+	    prev = add(disableHempHighCheckBox = new CheckBox("Disable Hemp High"){
+		{a = (Utils.getprefb("disableHempHigh", true));}
+		public void changed(boolean val) {
+		    Utils.setprefb("disableHempHigh", val);
+		}
+	    }, prev.pos("bl").adds(0, 10));
+	    prev = add(disableOpiumHighCheckBox = new CheckBox("Disable Opium High"){
+		{a = (Utils.getprefb("disableOpiumHigh", true));}
+		public void changed(boolean val) {
+		    Utils.setprefb("disableOpiumHigh", val);
+		}
+	    }, prev.pos("bl").adds(0, 10));
+	    prev = add(disableLibertyCapsHighCheckBox = new CheckBox("Disable Liberty Caps High"){
+		{a = (Utils.getprefb("disableLibertyCapsHigh", true));}
+		public void changed(boolean val) {
+		    Utils.setprefb("disableLibertyCapsHigh", val);
+		}
+	    }, prev.pos("bl").adds(0, 10));
+	    //disableLibertyCapsHighCheckBox.setTextColor(Color.red);
+	    disableLibertyCapsHighCheckBox.tooltip = disableLibertyCapsHighTooltip;
+	    prev = add(disableDrunkennessDistortionCheckBox = new CheckBox("Disable Drunkenness Distortion"){
+		{a = (Utils.getprefb("disableDrunkennessDistortion", true));}
+		public void changed(boolean val) {
+		    Utils.setprefb("disableDrunkennessDistortion", val);
+		}
+	    }, prev.pos("bl").adds(0, 10));
+	    
+	    prev = adda(new PointBind(UI.scale(200)), scroll.pos("bl").adds(0, 10).x(scroll.sz.x / 2), 0.5, 0.0);
+	    prev = adda(new OptWnd.PButton(UI.scale(200), "Back", 27, back), prev.pos("bl").adds(0, 10).x(scroll.sz.x / 2), 0.5, 0.0);
+	    pack();
+	}
+    }
+    private void centerBackButton(Widget backButton, Widget parent){ // ND: Should only be used at the very end after the panel was already packed once.
+	backButton.move(new Coord(parent.sz.x/2-backButton.sz.x/2, backButton.c.y));
+	pack();
+    }
+    // Audio Settings Tooltips
+    private static final Object audioLatencyTooltip = RichText.render("Sets the size of the audio buffer." +
+	"\n" +
+	"\n$col[185,185,185]{Loftar claims that smaller sizes are better, but anything below 50ms always seems to stutter, so I limited it to that." +
+	"\nIncrease this if your audio is still stuttering.}", UI.scale(300));
+    
+    private static final Object disableScreenShakingTooltip = RichText.render("$col[185,185,185]{This usually happens when a dungeon is about to collapse, after you've defeated the boss.}", UI.scale(300));
+    private static final Object disableLibertyCapsHighTooltip = RichText.render("$col[200,0,0]{WARNING:} This is the only screen effect in the game that displays intense flashing lights and has sharp sounds." +
+	"\n" +
+	"\nIf you have epilepsy or are sensitive to these kinds of effects, I BEG YOU to keep it DISABLED if you are at risk." +
+	"\n" +
+	"\n$col[185,185,185]{I have no idea why this disgusting effect exists at all. " +
+	"\nThe vanilla client does not warn you about it in any way, shape or form.}", UI.scale(280));
 }

@@ -71,7 +71,8 @@ public class MapView extends PView implements DTarget, Console.Directory, Widget
     String stip = null;
     RichText otip = null;
     public boolean fullTip = false;
-    
+    public Thread pfthread;
+    public Coord currentCursorLocation;
     private boolean showgrid;
     
     public interface Delayed {
@@ -2346,6 +2347,7 @@ public class MapView extends PView implements DTarget, Console.Directory, Widget
     }
     
     public void mousemove(MouseMoveEvent ev) {
+	currentCursorLocation = ev.c;
 	if(grab != null)
 	    grab.mmousemove(ev.c);
 	Loader.Future<Plob> placing_l = this.placing;
