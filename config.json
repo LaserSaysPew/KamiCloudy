@@ -1,12 +1,12 @@
 {
-  "version": "26.01.2026 15:13",
+  "version": "26.01.2026 15:31",
   "general": {
     "toolbelt0": true,
     "item_drop_protection": true,
     "queue_path": true,
     "decal_shift_pickup": true,
     "storemap": true,
-    "auto_pick_radius": 173
+    "auto_pick_radius": 173.0
   },
   "ui": {
     "theme": "Small",

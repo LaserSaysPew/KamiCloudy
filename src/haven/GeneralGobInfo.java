@@ -469,7 +469,8 @@ public class GeneralGobInfo extends GobInfo {
     }
     
     private static String shorten(String text) {
-	return text.replaceAll(" Hide|Dried |Bar of | Leaf| Leaves", "");
+	
+	return text.replaceAll(" Hide|Dried |Bar of | Leaf| Leaves| Scales|Cave | Fur|fluid| Flour", "").replaceAll("Caves","S");
     }
     
     @Override
