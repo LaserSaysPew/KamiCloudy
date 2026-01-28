@@ -43,7 +43,8 @@ public class LoginScreen extends Widget {
     public final String confname;
     private Text error, progress;
     private Button optbtn;
-    private OptWnd opts;
+    private OptWnd opts = new OptWnd(true); // ND: This needs to be created when the login screen is created, to prevent options nullpointers once we log into a character
+    
 
     private WindowX log;
     AccountList accounts;

@@ -1,5 +1,5 @@
 {
-  "version": "26.01.2026 15:58",
+  "version": "28.01.2026 15:04",
   "general": {
     "toolbelt0": true,
     "item_drop_protection": true,
@@ -38,7 +38,7 @@
       "show": true
     },
     "no_mat": {
-      "cupboards": true
+      "cupboards": false
     },
     "aura": {
       "rabbit": true,
